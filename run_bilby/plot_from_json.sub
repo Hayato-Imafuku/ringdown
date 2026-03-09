@@ -1,0 +1,21 @@
+universe = vanilla
+executable = run_py.sh
+
+arguments = ./config/$(name).ini
+
+transfer_input_files = plot_from_json.py, single_posterior_plot.py
+request_memory = 209370
+request_cpus = 1
+log = test.log
+
+error = plot_$(name)_$(cluster)_$$([$(Process)+$(index)]).err
+output = plot_$(name)_$(cluster)_$$([$(Process)+$(index)]).out
+
+notification = never
+
+name = test
+
+index = 0
+#index = 450
+
+queue 1

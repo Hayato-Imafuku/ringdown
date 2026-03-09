@@ -1,0 +1,85 @@
+universe = vanilla
+executable = run_py.sh
+
+arguments = ./config/$(name).ini
+
+transfer_input_files = ringdown_waveform_injection_analysis.py, single_posterior_plot.py, priors_condition.py
+request_memory = 209370
+request_cpus = 64
+log = test.log
+
+error = test_$(name)_$(cluster)_$$([$(Process)+$(index)]).err
+output = test_$(name)_$(cluster)_$$([$(Process)+$(index)]).out
+
+notification = never
+
+queue name, index from (
+#  shiftRe_to_220_dw0.1w1_snr100_DSparam_Heaviside, 0
+#  shiftRe_to_220_dw0.01w1_snr100_DSparam_Heaviside, 0
+#  shiftRe_to_220_dw0.001w1_snr100_DSparam_Heaviside, 0
+#  shiftIm_to_220_dw0.1w1_snr100_DSparam_Heaviside, 0
+#  shiftIm_to_220_dw0.01w1_snr100_DSparam_Heaviside, 0
+#  shiftIm_to_220_dw0.001w1_snr100_DSparam_Heaviside, 0
+#  space
+#  shiftRe_to_220_dw0.1w1_snr100_OTparam, 0
+#  shiftRe_to_220_dw0.01w1_snr100_OTparam, 0
+#  shiftRe_to_220_dw0.001w1_snr100_OTparam, 0
+#  shiftIm_to_220_dw0.1w1_snr100_OTparam, 0
+#  shiftIm_to_220_dw0.01w1_snr100_OTparam, 0
+#  shiftIm_to_220_dw0.001w1_snr100_OTparam, 0
+#  space
+#  shiftRe_to_220_dw0.1w1_snr100_OTparam_real_amp_Heaviside, 0
+#  shiftRe_to_220_dw0.01w1_snr100_OTparam_real_amp_Heaviside, 0
+#  shiftRe_to_220_dw0.001w1_snr100_OTparam_real_amp_Heaviside, 0
+#  shiftIm_to_220_dw0.1w1_snr100_OTparam_real_amp_Heaviside, 0
+#  shiftIm_to_220_dw0.01w1_snr100_OTparam_real_amp_Heaviside, 0
+#  shiftIm_to_220_dw0.001w1_snr100_OTparam_real_amp_Heaviside, 0
+#  space
+#  shiftRe_to_220_dw0.1w1_snr100_OTparam_real_amp_Mirror, 0
+#  shiftRe_to_220_dw0.01w1_snr100_OTparam_real_amp_Mirror, 0
+#  shiftRe_to_220_dw0.001w1_snr100_OTparam_real_amp_Mirror, 0
+#  shiftIm_to_220_dw0.1w1_snr100_OTparam_real_amp_Mirror, 0
+#  shiftIm_to_220_dw0.01w1_snr100_OTparam_real_amp_Mirror, 0
+#  shiftIm_to_220_dw0.001w1_snr100_OTparam_real_amp_Mirror, 0
+#  space
+#  shiftRe_to_220_dw0.1w1_snr100_DSparam_Mirror, 0
+#  shiftRe_to_220_dw0.01w1_snr100_DSparam_Mirror, 0
+#  shiftRe_to_220_dw0.001w1_snr100_DSparam_Mirror, 0
+#  shiftIm_to_220_dw0.1w1_snr100_DSparam_Mirror, 0
+#  shiftIm_to_220_dw0.01w1_snr100_DSparam_Mirror, 0
+#  shiftIm_to_220_dw0.001w1_snr100_DSparam_Mirror, 0
+#  space
+#  shiftRe_to_220_dw0.1w1_snr100_DSparam_window0.001, 0
+#  shiftRe_to_220_dw0.1w1_snr100_DSparam_window0.003, 0
+#  shiftRe_to_220_dw0.1w1_snr100_DSparam_window0.005, 0
+# space
+#  shiftRe_to_220_dw0.1w1_snr100_EPparam_Mirror, 0
+#  shiftRe_to_220_dw0.01w1_snr100_EPparam_Mirror, 0
+#  shiftRe_to_220_dw0.001w1_snr100_EPparam_Mirror, 0
+#  shiftIm_to_220_dw0.1w1_snr100_EPparam_Mirror, 0
+#  shiftIm_to_220_dw0.01w1_snr100_EPparam_Mirror, 0
+#  shiftIm_to_220_dw0.001w1_snr100_EPparam_Mirror, 0
+# space
+#  shiftRe_to_220_dw0.1w1_snr100_EPparam_Heaviside, 0
+#  shiftRe_to_220_dw0.01w1_snr100_EPparam_Heaviside, 0
+#  shiftRe_to_220_dw0.001w1_snr100_EPparam_Heaviside, 0
+#  shiftIm_to_220_dw0.1w1_snr100_EPparam_Heaviside, 0
+#  shiftIm_to_220_dw0.01w1_snr100_EPparam_Heaviside, 0
+#  shiftIm_to_220_dw0.001w1_snr100_EPparam_Heaviside, 0
+# space
+#  test_oneDS, 0
+#  space
+#  shiftRe_to_220_dw0.1w1_snr100_DSparam_Mirror_zero_noise, 0
+#  shiftRe_to_220_dw0.01w1_snr100_DSparam_Mirror_zero_noise, 0
+#  shiftRe_to_220_dw0.001w1_snr100_DSparam_Mirror_zero_noise, 0
+#  shiftIm_to_220_dw0.1w1_snr100_DSparam_Mirror_zero_noise, 0
+#  shiftIm_to_220_dw0.01w1_snr100_DSparam_Mirror_zero_noise, 0
+#  shiftIm_to_220_dw0.001w1_snr100_DSparam_Mirror_zero_noise, 0
+#  oneDS_Mirror_zero_noise, 0
+# space
+#  oneDS_zero_noise_tdomain_Mirror, 0
+#  oneDS_zero_noise_Heaviside, 0
+#  oneDS_zero_noise_Heaviside_-hx, 0
+#  oneDS_Heaviside, 0
+  oneDS_Heaviside_-hx, 0
+)

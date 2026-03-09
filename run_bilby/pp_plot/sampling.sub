@@ -1,0 +1,26 @@
+universe = vanilla
+executable = run_py.sh
+
+arguments = ./config/$(name)/$(name)_$$([$(Process)+$(index)]).ini
+
+transfer_input_files = ringdown_waveform_injection_analysis.py, single_posterior_plot.py
+request_memory = 209370
+request_cpus = 64
+log = logs/test.log
+
+error = logs/pp_$(name)_$(cluster)_$$([$(Process)+$(index)]).err
+output = logs/pp_$(name)_$(cluster)_$$([$(Process)+$(index)]).out
+
+notification = never
+
+#name = pp_one_mode
+#name = pp_one_mode_damp_analysis_APriLogUni
+#name = pp_one_mode_DSPram_APriLogUni
+#name = pp_one_mode_DSPram_APriUni
+#name = pp_two_mode_generated_by_DSPram
+#name = pp_two_mode_generated_by_OTparam
+name = pp_two_mode_generated_by_OTparam_corrected
+
+index = 83
+
+queue 1
