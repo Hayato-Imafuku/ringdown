@@ -18,3 +18,4 @@ outdir_*
 *.pdf
 *.png
 *.txt
+*.nb
