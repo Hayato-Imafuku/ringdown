@@ -31,17 +31,24 @@ queue name, index from (
 #  pyring_shiftRe_to_220_dw0.01w1_snr100_DSparam_zero_noise, 0
 #  pyring_shiftRe_to_220_dw0.001w1_snr100_DSparam_zero_noise, 0
 #space
-  pyring_shiftIm_to_220_dw0.1w1_snr100_DSparam, 0
-  pyring_shiftIm_to_220_dw0.01w1_snr100_DSparam, 0
-  pyring_shiftIm_to_220_dw0.001w1_snr100_DSparam, 0
-  pyring_shiftRe_to_220_dw0.1w1_snr100_DSparam, 0
-  pyring_shiftRe_to_220_dw0.01w1_snr100_DSparam, 0
-  pyring_shiftRe_to_220_dw0.001w1_snr100_DSparam, 0
+#  pyring_shiftIm_to_220_dw0.1w1_snr100_DSparam, 0
+#  pyring_shiftIm_to_220_dw0.01w1_snr100_DSparam, 0
+#  pyring_shiftIm_to_220_dw0.001w1_snr100_DSparam, 0
+#  pyring_shiftRe_to_220_dw0.1w1_snr100_DSparam, 0
+#  pyring_shiftRe_to_220_dw0.01w1_snr100_DSparam, 0
+#  pyring_shiftRe_to_220_dw0.001w1_snr100_DSparam, 0
 #space
-#  pyring_shiftIm_to_220_dw0.1w1_snr100_OTparam_real_amp, 0
-#  pyring_shiftIm_to_220_dw0.01w1_snr100_OTparam_real_amp, 0
-#  pyring_shiftIm_to_220_dw0.001w1_snr100_OTparam_real_amp, 0
-#  pyring_shiftRe_to_220_dw0.1w1_snr100_OTparam_real_amp, 0
-#  pyring_shiftRe_to_220_dw0.01w1_snr100_OTparam_real_amp, 0
-#  pyring_shiftRe_to_220_dw0.001w1_snr100_OTparam_real_amp, 0
+  pyring_shiftIm_to_220_dw0.1w1_snr100_OTparam_real_amp, 0
+  pyring_shiftIm_to_220_dw0.01w1_snr100_OTparam_real_amp, 0
+  pyring_shiftIm_to_220_dw0.001w1_snr100_OTparam_real_amp, 0
+  pyring_shiftRe_to_220_dw0.1w1_snr100_OTparam_real_amp, 0
+  pyring_shiftRe_to_220_dw0.01w1_snr100_OTparam_real_amp, 0
+  pyring_shiftRe_to_220_dw0.001w1_snr100_OTparam_real_amp, 0
+#space
+#  pyring_shiftIm_to_220_dw0.1w1_snr100_EPparam, 0
+#  pyring_shiftIm_to_220_dw0.01w1_snr100_EPparam, 0
+#  pyring_shiftIm_to_220_dw0.001w1_snr100_EPparam, 0
+#  pyring_shiftRe_to_220_dw0.1w1_snr100_EPparam, 0
+#  pyring_shiftRe_to_220_dw0.01w1_snr100_EPparam, 0
+#  pyring_shiftRe_to_220_dw0.001w1_snr100_EPparam, 0
 )

@@ -96,7 +96,9 @@ def plot_corner_pyring(path_posterior_sample, path_config, path_outdir, show_fig
         'tau_t_0': r'$\tau_1 \ [\mathrm{s}]$',
         'tau_t_1': r'$\tau_2 \ [\mathrm{s}]$',
         'phi_t_0': r'$\phi_1 \ [\mathrm{rad}]$',
-        'phi_t_1': r'$\phi_2 \ [\mathrm{rad}]$'
+        'phi_t_1': r'$\phi_2 \ [\mathrm{rad}]$',
+        'C' : r'$C$',
+        'D' : r'$D$',
     }
 
     """set function of conversion"""
