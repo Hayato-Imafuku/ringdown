@@ -2,6 +2,7 @@ import corner
 from matplotlib.lines import Line2D
 import matplotlib.pyplot as plt
 import matplotlib
+import matplotlib.colors as mcolors
 from gwpy.timeseries import TimeSeries
 import math
 import bilby
@@ -23,7 +24,7 @@ import json
 import configparser
 import errno
 
-def plot_corner_pyring(path_posterior_sample, path_config, path_outdir, show_fig=False):
+def plot_corner_pyring(path_posterior_sample, path_config, path_outdir, plot_kde=True, show_fig=False):
     """ignore warnings"""
     warnings.filterwarnings("ignore", category=FutureWarning, 
                             module="seaborn._oldcore", lineno=1119)
@@ -76,7 +77,7 @@ def plot_corner_pyring(path_posterior_sample, path_config, path_outdir, show_fig
         'A': r'$A \times 10^{-17}$',
         'A1': r'$A_1 \times 10^{-19}$',
         'A2': r'$A_2 \times 10^{-19}$',
-        'alpha': r'$\alpha$',
+        'alpha': r'$\alpha \ [\mathrm{s}]$',
         'f': r'$f \ [\mathrm{Hz}]$',
         'f1': r'$f_1 \ [\mathrm{Hz}]$',
         'f2': r'$f_2 \ [\mathrm{Hz}]$',
@@ -97,8 +98,12 @@ def plot_corner_pyring(path_posterior_sample, path_config, path_outdir, show_fig
         'tau_t_1': r'$\tau_2 \ [\mathrm{s}]$',
         'phi_t_0': r'$\phi_1 \ [\mathrm{rad}]$',
         'phi_t_1': r'$\phi_2 \ [\mathrm{rad}]$',
-        'C' : r'$C$',
-        'D' : r'$D$',
+        'phiA': r'$\phi_A \ [\mathrm{rad}]$',
+        'phialpha': r'$\phi_{\alpha} \ [\mathrm{rad}]$',
+        'C' : r'$C \times 10^{-21}$',
+        'D' : r'$D \times 10^{-17}$',
+        'phiC': r'$\phi_C \ [\mathrm{rad}]$',
+        'phiD': r'$\phi_D \ [\mathrm{rad}]$',
     }
 
     """set function of conversion"""
@@ -135,12 +140,27 @@ def plot_corner_pyring(path_posterior_sample, path_config, path_outdir, show_fig
     config_injection = config_ini['Injection']
     injection_parameters_dict = {}
     for key, val in config_injection.items():
-        if 'A_' in key:
+        if 'A_' in key or key in ['A1', 'A2']:
             injection_parameters_dict[key] = float(val) * 1e19
+            if key in df_ver1.columns:
+                df_ver1[key] = df_ver1[key] * 1e19
         elif key == 'A':
             injection_parameters_dict[key] = float(val) * 1e17
+            if key in df_ver1.columns:
+                df_ver1[key] = df_ver1[key] * 1e17
         else:
             injection_parameters_dict[key] = float(val)
+    if 'EPparam' in path_posterior_sample:
+        injection_parameters_dict_new = {}
+        injection_parameters_dict_new['C'] = injection_parameters_dict['A'] * injection_parameters_dict['alpha'] * 1e4
+        injection_parameters_dict_new['D'] = injection_parameters_dict['A']
+        injection_parameters_dict_new['f'] = injection_parameters_dict['f1']
+        injection_parameters_dict_new['tau'] = injection_parameters_dict['tau1']
+        injection_parameters_dict_new['phiC'] = np.angle(-np.exp(1j*(injection_parameters_dict['phiA']+injection_parameters_dict['phialpha'])))
+        injection_parameters_dict_new['phiD'] = injection_parameters_dict['phiA']
+        injection_parameters_dict = injection_parameters_dict_new
+        df_ver1['C'] = df_ver1['C'] * 1e21
+        df_ver1['D'] = df_ver1['D'] * 1e17
     print(' injection_parameters : {}'.format(injection_parameters_dict))
 
     """set fixed parameters"""
@@ -261,8 +281,9 @@ def plot_corner_pyring(path_posterior_sample, path_config, path_outdir, show_fig
 
             error = rf"${median_str}_{{-{lower_str}}}^{{+{upper_str}}}$"
         return error
-        
-    def format_custum_f_g(median, dif_lower, dif_upper):
+
+    """Plot kdeplot for lower triangle"""
+    def format_custom_f_g(median, dif_lower, dif_upper):
         max_error = max(abs(dif_lower), abs(dif_upper))
         exponent = int(np.floor(np.log10(max_error)))
         if exponent <= -3:
@@ -282,8 +303,7 @@ def plot_corner_pyring(path_posterior_sample, path_config, path_outdir, show_fig
             return f"{num:.{precision + 2}f}"
         else:
             return f"{num:.{precision}f}"
-    
-    """Plot kdeplot for lower triangle"""
+
     def kde_contour_plot(x, y, **kwargs):
         ax = plt.gca() #get current axes object
         if np.isnan(x).all() or np.isnan(y).all(): #nan value do not plotted
@@ -292,18 +312,11 @@ def plot_corner_pyring(path_posterior_sample, path_config, path_outdir, show_fig
         #sns.kdeplot(x=x, y=y, ax=ax, levels=[0.1, 1.0], fill=True, cut=0, alpha=0.5, **kwargs) #credible level 90
         #sns.kdeplot(x=x, y=y, ax=ax, levels=[0.1, 0.5], cut=0, **kwargs)
     
-        #The contour levels to draw. see https://corner.readthedocs.io/en/latest/api/#corner.hist2d(be careful the difference of "levels" in corner.py and seaborn)
+        #The contour levels to draw. see https://corner.readthedocs.io/en/latest/api/#corner.hist2d (be careful the difference of "levels" in corner.py and seaborn)
         sns.kdeplot(x=x, y=y, ax=ax, levels=[np.exp(-9./2.), np.exp(-4./2.)], fill=True, cut=3, alpha=0.3, **kwargs) #3-sigma to 2-sigma
         sns.kdeplot(x=x, y=y, ax=ax, levels=[np.exp(-4./2.), np.exp(-1./2.)], fill=True, cut=3, alpha=0.6, **kwargs) #2-sigma to 1-sigma
-        sns.kdeplot(x=x, y=y, ax=ax, levels=[np.exp(-1./2.), 1.0], fill=True, cut=2, alpha=0.9, **kwargs)
-        sns.kdeplot(x=x, y=y, ax=ax, levels=[np.exp(-9. / 2.), np.exp(-4. / 2.), np.exp(-1. / 2.)], cut=2, **kwargs)
-    
-    def add_center_text(ax, text, hight, font_color):
-        """add text to top of figure"""
-        ax = ax
-        x = 0.5
-        y = hight
-        ax.text(x, y, text, ha='center', va='center', fontsize=16, color=font_color, transform=ax.transAxes)
+        sns.kdeplot(x=x, y=y, ax=ax, levels=[np.exp(-1./2.), 1.0], fill=True, cut=3, alpha=0.9, **kwargs) #1-sigma to 0-sigma
+        sns.kdeplot(x=x, y=y, ax=ax, levels=[np.exp(-9. / 2.), np.exp(-4. / 2.), np.exp(-1. / 2.)], cut=3, **kwargs) #contour line
     
     def custom_kdeplot(*args, **kwargs):
         ax = plt.gca()
@@ -342,13 +355,92 @@ def plot_corner_pyring(path_posterior_sample, path_config, path_outdir, show_fig
 
         # error = format_error_latex_scaled(median, dif_lower, dif_upper)
 
-        error = format_custum_f_g(median, dif_lower, dif_upper)
-        
-        add_center_text(ax, error, 1.2, 'black')
-        
+        error = format_custom_f_g(median, dif_lower, dif_upper)
+
+        color_index = palette.index(color)
+
+        offset = 0.15 * (n_colors - color_index - 1)
+        if n_colors > 1:
+            add_center_text(ax, error, 1.2 + offset, color)
+        elif n_colors == 1:
+            add_center_text(ax, error, 1.2 + offset, 'black')
+
         #y_min, y_max = ax.get_ylim()
         #ax.set_ylim(0, y_max*1.3)
     
+    """histgram version"""
+    def fast_contour_plot(x, y, **kwargs):
+        ax = plt.gca()
+        color = kwargs.pop("color", "k")
+
+        if isinstance(color, tuple):
+            color = mcolors.to_hex(color)
+        
+        corner.hist2d(
+                    x.values,
+                    y.values,
+                    ax=ax,
+                    color=color, 
+                    plot_datapoints=False,
+                    plot_density=True, 
+                    levels=[1.0-np.exp(-0.5), 1.0-np.exp(-2.0), 1.0-np.exp(-4.5)],
+                    # levels=[0.5, 0.9],
+                    fill_contours=True,
+                    alpha=0.2
+                    )
+
+    def custom_histplot(*args, **kwargs):
+        ax = plt.gca()
+        data = args[0]
+
+        color = kwargs.pop("color") # colorを受け取る
+    
+        sns.histplot(data,
+                    ax=ax,
+                    element="step", 
+                    fill=False,
+                    stat="density",
+                    color=color,
+                    **kwargs)
+
+        quantiles = (0.05, 0.95)
+        quants_to_compute = np.array([quantiles[0], 0.5, quantiles[1]])
+        quants = np.percentile(data, quants_to_compute * 100)
+        lower_limit = quants[0]
+        median = quants[1]  
+        upper_limit = quants[2]
+        dif_upper = upper_limit - median 
+        dif_lower = median - lower_limit
+
+        
+        """add quantiles line"""
+        ax.axvline(lower_limit, color=color, linestyle='--', lw=1.5)
+        ax.axvline(upper_limit, color=color, linestyle='--', lw=1.5)
+    
+        """set text of error bar"""
+        error = format_custom_f_g(median, dif_lower, dif_upper)
+        
+        color_index = palette.index(color)
+
+        offset = 0.15 * (n_colors - color_index - 1)
+        if n_colors == 1:
+            add_center_text(ax, error, 1.2 + offset, 'black')
+        else:
+            add_center_text(ax, error, 1.2 + offset, color)
+
+        # if color == (0.00392156862745098, 0.45098039215686275, 0.6980392156862745):
+        #     offset = 0.15
+        #     add_center_text(ax, error, 1.2 + offset, color)
+        # else:
+        #     add_center_text(ax, error, 1.2, color)
+
+    """add sub objects"""    
+    def add_center_text(ax, text, hight, font_color):
+        """add text to top of figure"""
+        ax = ax
+        x = 0.5
+        y = hight
+        ax.text(x, y, text, ha='center', va='center', fontsize=16, color=font_color, transform=ax.transAxes)
     
     def add_reference_lines_lower(x, y, **kwargs):
         ax = plt.gca()
@@ -365,18 +457,32 @@ def plot_corner_pyring(path_posterior_sample, path_config, path_outdir, show_fig
         ref_value = kwargs.pop('ref_value')
         x_ref = ref_value.get(x.name, None)
         print(x.name, x_ref)
-        if ref_value is not None:
+
+        if x_ref is not None:
             ax.axvline(x=x_ref, color='red', linestyle=':', lw=2.3)
             
+            x_min, x_max = ax.get_xlim()
+            range_width = x_max - x_min
+            
+            buffer = range_width * 0.1 # 10% buffer
+            
+            if x_ref < x_min:
+                ax.set_xlim(left=x_ref - buffer)
+            elif x_ref > x_max:
+                ax.set_xlim(right=x_ref + buffer)
+
             # value = r'${}$'.format(np.round(x_ref, 3))
             value = r'${}$'.format(format_value(x_ref, precision=3))
-            
+
             add_center_text(ax, value, 1.07, 'red')
     
     """Make PairGrid"""
+    n_colors = 1
+
     sns.set_style("whitegrid")
     sns.set_context("paper")
-    palette = sns.color_palette("colorblind", n_colors=2)
+    palette = sns.color_palette("colorblind", n_colors=n_colors)
+    plt.style.use('~/research/my_plot_style.style')
     plot = sns.PairGrid(use_data, #data set
                         diag_sharey=False, #diagnal plot do not use different range
                         corner=True, #only oneside plot
@@ -385,16 +491,34 @@ def plot_corner_pyring(path_posterior_sample, path_config, path_outdir, show_fig
                         aspect=1.0)
     
     """add some plots"""
-    plot = plot.map_lower(kde_contour_plot)
-    plot.map_diag(custom_kdeplot,  lw=2, alpha=0.7)
+    if plot_kde:
+        plot = plot.map_lower(kde_contour_plot)
+        # plot = plot.map_lower(hist_2d_plot, alpha=0.3)
+        plot.map_diag(custom_kdeplot, lw=2, alpha=0.7)
+    else:
+        plot = plot.map_lower(fast_contour_plot)
+        plot.map_diag(custom_histplot, lw=2, alpha=0.7)
+
     plot.map_lower(add_reference_lines_lower, ref_values=injection_parameters_dict)
-    plot.map_diag(add_reference_lines_diag, ref_value=injection_parameters_dict) 
-    
+    plot.map_diag(add_reference_lines_diag, ref_value=injection_parameters_dict)
+
     """Add legend"""
-    #handles = [Line2D([0], [0], color=palette[0], lw=4),
+    # handles = [Line2D([0], [0], color=palette[0], lw=4),
     #           Line2D([0], [0], color=palette[1], lw=4)]
-    #labels = [ "ver1", "ver2" ]
-    #plot.fig.legend(handles=handles, labels=labels, loc='upper left', bbox_to_anchor=(0.7, 0.98), fontsize=20)
+    handles = [Line2D([0], [0], color=palette[i], lw=4) for i in range(n_colors)]
+    
+    # labels = [ "damped sinusoids", "overtone" ]
+    # labels = ['bilby', 'pyring']
+    # labels = ['bilby_' + bilby_label, pyring_label]
+    # if bilby_label_v2 is not None:
+    #     labels = ['bilby_' + bilby_label, 'bilby_' + bilby_label_v2, pyring_label]
+    # plot.fig.legend(
+    #                 handles=handles,
+    #                 labels=labels,
+    #                 loc='upper right',
+    #                 bbox_to_anchor=(0.98, 1.05),
+    #                 fontsize=20
+    #                 )
     
     """Adjust style""" 
     plot.fig.subplots_adjust(top=0.95)
@@ -405,6 +529,7 @@ def plot_corner_pyring(path_posterior_sample, path_config, path_outdir, show_fig
           label_y=ax.get_ylabel()
           ax.set_xlabel(latex_labels.get(label_x, label_x), fontsize=20)
           ax.set_ylabel(latex_labels.get(label_y, label_y), fontsize=20)
+          ax.tick_params(axis='both', which='major', labelsize=14)
     
     """set file name of save fig"""
     def get_filename_without_extension(path):
@@ -435,7 +560,7 @@ if __name__ == "__main__":
     path_posterior = f'./outdirs/outdir_{label}/Nested_sampler/posterior.dat'
     config_file_path = f'./outdirs/outdir_{label}/{label}.ini'
     path_outdir = f'outdirs/outdir_{label}/'
-    plot_corner_pyring(path_posterior, config_file_path, path_outdir, show_fig=False)
+    plot_corner_pyring(path_posterior, config_file_path, path_outdir, plot_kde=False, show_fig=False)
 
     # label_list = ['pyring_shiftIm_to_220_dw0.1w1_snr100_DSparam',
     #               'pyring_shiftIm_to_220_dw0.01w1_snr100_DSparam',
