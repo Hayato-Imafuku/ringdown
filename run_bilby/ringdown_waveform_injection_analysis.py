@@ -255,7 +255,7 @@ def damped_sinusoid(time, A1, A2, f1, f2, tau1, tau2, phi1, phi2, geocent_time):
     plus = total_waveform.real * tukey_window
     cross = total_waveform.imag * tukey_window
 
-    return {"plus": plus, "cross": cross}
+    return {"plus": plus, "cross": - cross}
 
 def damped_sinusoid_fdomain_Heaviside(frequency, A1, A2, f1, f2, tau1, tau2, phi1, phi2, geocent_time):
         A1 = A1 * 1e-19
@@ -270,7 +270,7 @@ def damped_sinusoid_fdomain_Heaviside(frequency, A1, A2, f1, f2, tau1, tau2, phi
         plus = A1 * ((-1/tau1 - 1j*2*np.pi*frequency) * np.cos(phi1) + 2*np.pi*f1*np.sin(phi1)) / (d_positive_1 * d_negative_1) + A2 * ((-1/tau2 - 1j*2*np.pi*frequency) * np.cos(phi2) + 2*np.pi*f2*np.sin(phi2)) / (d_positive_2 * d_negative_2)
         cross = -A1 * (2*np.pi*f1*np.cos(phi1) + (1/tau1 + 1j*2*np.pi*frequency) * np.sin(phi1)) / (d_positive_1 * d_negative_1) - A2 * (2*np.pi*f2*np.cos(phi2) + (1/tau2 + 1j*2*np.pi*frequency) * np.sin(phi2)) / (d_positive_2 * d_negative_2)
 
-        return {'plus': plus, 'cross': cross}
+        return {'plus': plus, 'cross': -cross}
 
 def damped_sinusoid_fdomain_mirror(frequency, A1, A2, f1, f2, tau1, tau2, phi1, phi2, geocent_time):
         A1 = A1 * 1e-19
@@ -285,7 +285,7 @@ def damped_sinusoid_fdomain_mirror(frequency, A1, A2, f1, f2, tau1, tau2, phi1, 
         plus = 1 / 2**0.5 * (A1 / tau1 * (np.exp(-1j * phi1) / d_positive_1 + np.exp(1j * phi1) / d_negative_1) + A2 / tau2 * (np.exp(-1j * phi2) / d_positive_2 + np.exp(1j * phi2) / d_negative_2))
         cross = 1 / 2**0.5 * (-1j) * (A1 / tau1 * (- np.exp(-1j * phi1) / d_positive_1 + np.exp(1j * phi1) / d_negative_1) + A2 / tau2 * (- np.exp(-1j * phi2) / d_positive_2 + np.exp(1j * phi2) / d_negative_2))
 
-        return {'plus': plus, 'cross': cross}
+        return {'plus': plus, 'cross': -cross}
 
 def damped_sinusoid_one_mode_fdomain_Heaviside(frequency, A1, f1, tau1, phi1, geocent_time):
         A1 = A1 * 1e-19
@@ -481,15 +481,15 @@ if __name__ == "__main__" :
         alpha = float(config_injection['alpha'])
         w1 = (2 * np.pi * float(config_injection['f1']) + 1j / float(config_injection['tau1']))
         w2 = (2 * np.pi * float(config_injection['f2']) + 1j / float(config_injection['tau2']))
-        delta_w = w2 - w1
+        delta_w = w1 - w2
         A1_complex = A / delta_w
         A1 = np.abs(A1_complex) / 1e-20
         phi1_from_amp = np.angle(A1_complex)
-        phi1 = float(config_injection['phi1']) + phi1_from_amp
-        A2_complex = - A * (1 + alpha * delta_w) / delta_w
+        phi1 = float(config_injection['phiA']) + phi1_from_amp
+        A2_complex = - A * (1 + alpha * np.exp(1j*(float(config_injection['phialpha']))) * delta_w) / delta_w
         A2 = np.abs(A2_complex) / 1e-20
         phi2_from_amp = np.angle(A2_complex)
-        phi2 = float(config_injection['phi2']) + phi2_from_amp
+        phi2 = float(config_injection['phiA']) + phi2_from_amp
 
         """print parameters"""
         bilby.core.utils.logger.info('')
@@ -501,7 +501,7 @@ if __name__ == "__main__" :
         bilby.core.utils.logger.info('phi2 : {}'.format(phi2))
         bilby.core.utils.logger.info('w1 : {}'.format(w1))
         bilby.core.utils.logger.info('w2 : {}'.format(w2))
-        bilby.core.utils.logger.info('delta_w = w2-w1 : {}'.format(delta_w))
+        bilby.core.utils.logger.info('delta_w = w1-w2 : {}'.format(delta_w))
         bilby.core.utils.logger.info('delta_w * alpha : {}'.format(delta_w * alpha))
         bilby.core.utils.logger.info('Re[delta_w] / Re[w1] = {}'.format(delta_w.real / w1.real))
         bilby.core.utils.logger.info('Im[delta_w] / Im[w1] = {}'.format(delta_w.imag / w1.imag))
