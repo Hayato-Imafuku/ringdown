@@ -2,6 +2,7 @@ import corner
 from matplotlib.lines import Line2D
 import matplotlib.pyplot as plt
 import matplotlib
+import matplotlib.colors as mcolors
 from gwpy.timeseries import TimeSeries
 import math
 import bilby
@@ -21,7 +22,7 @@ import warnings
 import os
 import json
 
-def plot_posterior(path_json, path_outdir, default_plot_parameters=True, show_fig=False):
+def plot_posterior(path_json, path_outdir, default_plot_parameters=True, show_fig=False, plot_kde=False):
     # 特定の警告を非表示にする
     warnings.filterwarnings("ignore", category=FutureWarning, 
                             module="seaborn._oldcore", lineno=1119)
@@ -106,7 +107,7 @@ def plot_posterior(path_json, path_outdir, default_plot_parameters=True, show_fi
         'A': r'$A \times 10^{-17}$',
         'A1': r'$A_1 \times 10^{-19}$',
         'A2': r'$A_2 \times 10^{-19}$',
-        'alpha': r'$\alpha$',
+        'alpha': r'$\alpha \ [\mathrm{s}]$',
         'f': r'$f \ [\mathrm{Hz}]$',
         'f1': r'$f_1 \ [\mathrm{Hz}]$',
         'f2': r'$f_2 \ [\mathrm{Hz}]$',
@@ -115,6 +116,12 @@ def plot_posterior(path_json, path_outdir, default_plot_parameters=True, show_fi
         'tau2': r'$\tau_2 \ [\mathrm{s}]$',
         'phi1': r'$\phi_1 \ [\mathrm{rad}]$',
         'phi2': r'$\phi_2 \ [\mathrm{rad}]$',
+        'phiA': r'$\phi_A \ [\mathrm{rad}]$',
+        'phialpha': r'$\phi_\alpha \ [\mathrm{rad}]$',
+        'C': r'$C  \times 10^{-21}$',
+        'D': r'$D  \times 10^{-17}$',
+        'phiC': r'$\phi_C \ [\mathrm{rad}]$',
+        'phiD': r'$\phi_D \ [\mathrm{rad}]$',
     }
 
     """set latex format for error bar"""
@@ -245,6 +252,20 @@ def plot_posterior(path_json, path_outdir, default_plot_parameters=True, show_fi
     df_ver1 = pd.DataFrame(posterior_ver1, columns=keys_to_plot) # Create DataFrames for the posteriors
     df_ver1['source'] = 'ver1' # Add 'source' line
 
+    """For EP_waveform"""
+    if 'EPparam' in path_json:
+        injection_parameters_dict_new = {}
+        injection_parameters_dict_new['C'] = injection_parameters_dict['A'] * injection_parameters_dict['alpha'] * 1e4 # A is normalized by factor of 10^-17
+        injection_parameters_dict_new['D'] = injection_parameters_dict['A']
+        injection_parameters_dict_new['f'] = injection_parameters_dict['f1']
+        injection_parameters_dict_new['tau'] = injection_parameters_dict['tau1']
+        injection_parameters_dict_new['phiC'] = np.angle(-np.exp(1j*(injection_parameters_dict['phiA']+injection_parameters_dict['phialpha'])))
+        injection_parameters_dict_new['phiD'] = injection_parameters_dict['phiA']
+        injection_parameters_dict = injection_parameters_dict_new
+        df_ver1['C'] = df_ver1['C'] * 1e21
+        df_ver1['D'] = df_ver1['D'] * 1e17
+    print(' injection_parameters : {}'.format(injection_parameters_dict))
+
     """change theta_jn to cos(theta_jn)"""
     if 'theta_jn' in keys_to_plot:
         change = 'cos'
@@ -263,25 +284,30 @@ def plot_posterior(path_json, path_outdir, default_plot_parameters=True, show_fi
             df_ver1 = df_ver1.rename(columns={'theta_jn':'sin^2(iota)'})
             injection_parameters_dict['sin^2(iota)'] = np.sin(injection_parameters_dict['theta_jn'])**2.
 
-    if 'delta_f' in keys_to_plot:
-        df_ver1['delta_f'] = df_ver1['delta_f'] + df_ver1['f1']
-        df_ver1 = df_ver1.rename(columns={'delta_f':'f2'})
-        injection_parameters_dict['f2'] = injection_parameters_dict['delta_f'] + injection_parameters_dict['f1']
-
-    if 'delta_tau' in keys_to_plot:
-        df_ver1['delta_tau'] = df_ver1['delta_tau'] + df_ver1['tau1']
-        df_ver1 = df_ver1.rename(columns={'delta_tau':'tau2'})
-        injection_parameters_dict['tau2'] = injection_parameters_dict['delta_tau'] + injection_parameters_dict['tau1']
-    
-    if 'f' in keys_to_plot and 'f1' in injection_parameters_dict.keys():
-        injection_parameters_dict['f'] = (injection_parameters_dict['f1'] + injection_parameters_dict['f2']) / 2
-    
-    if 'tau' in keys_to_plot and 'tau1' in injection_parameters_dict.keys():
-        injection_parameters_dict['tau'] = (injection_parameters_dict['tau1'] + injection_parameters_dict['tau2']) / 2
-
     use_data = df_ver1
 
     """Plot kdeplot for lower triangle"""
+    def format_custom_f_g(median, dif_lower, dif_upper):
+        max_error = max(abs(dif_lower), abs(dif_upper))
+        exponent = int(np.floor(np.log10(max_error)))
+        if exponent <= -3:
+            fmt = '.2g'
+            fmt = "{{0:{0}}}".format(fmt).format
+            string_template = r"${{{0}}}_{{-{1}}}^{{+{2}}}$"
+            error = string_template.format(fmt(median), fmt(dif_lower), fmt(dif_upper))
+        else:
+            fmt = '.3f'
+            fmt = "{{0:{0}}}".format(fmt).format
+            string_template = r"${{{0}}}_{{-{1}}}^{{+{2}}}$"
+            error = string_template.format(fmt(median), fmt(abs(dif_lower)), fmt(abs(dif_upper)))
+        return error
+    
+    def format_value(num, precision=3):
+        if abs(num) < 0.1 and num != 0:
+            return f"{num:.{precision + 2}f}"
+        else:
+            return f"{num:.{precision}f}"
+
     def kde_contour_plot(x, y, **kwargs):
         ax = plt.gca() #get current axes object
         if np.isnan(x).all() or np.isnan(y).all(): #nan value do not plotted
@@ -371,10 +397,121 @@ def plot_posterior(path_json, path_outdir, default_plot_parameters=True, show_fi
             
             add_center_text(ax, value, 1.07, 'red')
     
+    """histgram version"""
+    def fast_contour_plot(x, y, **kwargs):
+        ax = plt.gca()
+        color = kwargs.pop("color", "k")
+
+        if isinstance(color, tuple):
+            color = mcolors.to_hex(color)
+        
+        corner.hist2d(
+                    x.values,
+                    y.values,
+                    ax=ax,
+                    color=color, 
+                    plot_datapoints=False,
+                    plot_density=False, 
+                    levels=[1.0-np.exp(-0.5), 1.0-np.exp(-2.0), 1.0-np.exp(-4.5)],
+                    # levels=[0.5, 0.9],
+                    fill_contours=True,
+                    alpha=0.2
+                    )
+
+    def custom_histplot(*args, **kwargs):
+        ax = plt.gca()
+        data = args[0]
+
+        color = kwargs.pop("color") # colorを受け取る
+    
+        sns.histplot(data,
+                    ax=ax,
+                    element="step", 
+                    fill=False,
+                    stat="density",
+                    color=color,
+                    **kwargs)
+
+        quantiles = (0.05, 0.95)
+        quants_to_compute = np.array([quantiles[0], 0.5, quantiles[1]])
+        quants = np.percentile(data, quants_to_compute * 100)
+        lower_limit = quants[0]
+        median = quants[1]  
+        upper_limit = quants[2]
+        dif_upper = upper_limit - median 
+        dif_lower = median - lower_limit
+
+        
+        """add quantiles line"""
+        ax.axvline(lower_limit, color=color, linestyle='--', lw=1.5)
+        ax.axvline(upper_limit, color=color, linestyle='--', lw=1.5)
+    
+        """set text of error bar"""
+        error = format_custom_f_g(median, dif_lower, dif_upper)
+        
+        color_index = palette.index(color)
+
+        offset = 0.15 * (n_colors - color_index - 1)
+        if n_colors == 1:
+            add_center_text(ax, error, 1.2 + offset, 'black')
+        else:
+            add_center_text(ax, error, 1.2 + offset, color)
+
+        # if color == (0.00392156862745098, 0.45098039215686275, 0.6980392156862745):
+        #     offset = 0.15
+        #     add_center_text(ax, error, 1.2 + offset, color)
+        # else:
+        #     add_center_text(ax, error, 1.2, color)
+
+    """add sub objects"""    
+    def add_center_text(ax, text, hight, font_color):
+        """add text to top of figure"""
+        ax = ax
+        x = 0.5
+        y = hight
+        ax.text(x, y, text, ha='center', va='center', fontsize=16, color=font_color, transform=ax.transAxes)
+    
+    def add_reference_lines_lower(x, y, **kwargs):
+        ax = plt.gca()
+        ref_values = kwargs.pop('ref_values') #get injection value
+        x_ref, y_ref = ref_values.get(x.name, None), ref_values.get(y.name, None)
+        """write injection value"""
+        if x_ref is not None:
+            ax.axvline(x=x_ref, color='red', linestyle=':', lw=2.3)
+        if y_ref is not None:
+            ax.axhline(y=y_ref, color='red', linestyle=':', lw=2.3)
+    
+    def add_reference_lines_diag(x, **kwargs):
+        ax = plt.gca()
+        ref_value = kwargs.pop('ref_value')
+        x_ref = ref_value.get(x.name, None)
+        print(x.name, x_ref)
+
+        if x_ref is not None:
+            ax.axvline(x=x_ref, color='red', linestyle=':', lw=2.3)
+            
+            x_min, x_max = ax.get_xlim()
+            range_width = x_max - x_min
+            
+            buffer = range_width * 0.1 # 10% buffer
+            
+            if x_ref < x_min:
+                ax.set_xlim(left=x_ref - buffer)
+            elif x_ref > x_max:
+                ax.set_xlim(right=x_ref + buffer)
+
+            # value = r'${}$'.format(np.round(x_ref, 3))
+            value = r'${}$'.format(format_value(x_ref, precision=3))
+
+            add_center_text(ax, value, 1.07, 'red')
+    
     """Make PairGrid"""
+    n_colors = 1
+
     sns.set_style("whitegrid")
     sns.set_context("paper")
-    palette = sns.color_palette("colorblind", n_colors=2)
+    palette = sns.color_palette("colorblind", n_colors=n_colors)
+    plt.style.use('~/research/my_plot_style.style')
     plot = sns.PairGrid(use_data, #data set
                         diag_sharey=False, #diagnal plot do not use different range
                         corner=True, #only oneside plot
@@ -383,11 +520,17 @@ def plot_posterior(path_json, path_outdir, default_plot_parameters=True, show_fi
                         aspect=1.0)
     
     """add some plots"""
-    plot = plot.map_lower(kde_contour_plot)
-    plot.map_diag(custom_kdeplot,  lw=2, alpha=0.7)
+    if plot_kde:
+        plot = plot.map_lower(kde_contour_plot)
+        # plot = plot.map_lower(hist_2d_plot, alpha=0.3)
+        plot.map_diag(custom_kdeplot, lw=2, alpha=0.7)
+    else:
+        plot = plot.map_lower(fast_contour_plot)
+        plot.map_diag(custom_histplot, lw=2, alpha=0.7)
+
     plot.map_lower(add_reference_lines_lower, ref_values=injection_parameters_dict)
-    plot.map_diag(add_reference_lines_diag, ref_value=injection_parameters_dict) 
-    
+    plot.map_diag(add_reference_lines_diag, ref_value=injection_parameters_dict)
+
     """Add legend"""
     #handles = [Line2D([0], [0], color=palette[0], lw=4),
     #           Line2D([0], [0], color=palette[1], lw=4)]
@@ -403,6 +546,9 @@ def plot_posterior(path_json, path_outdir, default_plot_parameters=True, show_fi
           label_y=ax.get_ylabel()
           ax.set_xlabel(latex_labels.get(label_x, label_x), fontsize=20)
           ax.set_ylabel(latex_labels.get(label_y, label_y), fontsize=20)
+          ax.tick_params(axis='both', which='major', labelsize=14)
+          ax.xaxis.get_offset_text().set_fontsize(12)
+          ax.yaxis.get_offset_text().set_fontsize(12)
     
     """set file name of save fig"""
     def get_filename_without_extension(path):

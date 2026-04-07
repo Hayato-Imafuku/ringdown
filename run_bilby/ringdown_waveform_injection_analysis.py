@@ -124,7 +124,7 @@ def toy_model_of_two_QNMs_window(time, A, alpha, f1, f2, tau1, tau2, phi1, phi2,
     
     return {"plus": plus, "cross": cross}
 
-def toy_model_of_two_QNMs_Heaviside(time, A, alpha, f1, f2, tau1, tau2, phi1, phi2, geocent_time):
+def toy_model_of_two_QNMs_Heaviside(time, A, alpha, f1, f2, tau1, tau2, phiA, phialpha, geocent_time):
     
     waveform1 = np.zeros(len(time), dtype=complex)
     waveform2 = np.zeros(len(time), dtype=complex)
@@ -133,12 +133,15 @@ def toy_model_of_two_QNMs_Heaviside(time, A, alpha, f1, f2, tau1, tau2, phi1, ph
 
     w1 = (2*np.pi*f1 + 1j / tau1)
     w2 = (2*np.pi*f2 + 1j / tau2)
-    delta_w = w2 - w1
+    delta_w = w1 - w2
     
     tidx = time >= geocent_time
+
+    amp1 = A / delta_w
+    amp2 = -A / delta_w * (1 + delta_w * alpha * np.exp(1j * phialpha))
     
-    waveform1[tidx] = A / delta_w * np.exp(1j * (w1 * (time[tidx] - geocent_time)) + 1j * phi1)
-    waveform2[tidx] = -A / delta_w * (1 + delta_w * alpha) * np.exp(1j * (w2 * (time[tidx] - geocent_time)) + 1j * phi2)
+    waveform1[tidx] = amp1 * np.exp(1j * (w1 * (time[tidx] - geocent_time)) + 1j * phiA)
+    waveform2[tidx] = amp2 * np.exp(1j * (w2 * (time[tidx] - geocent_time)) + 1j * phiA)
 
     total_waveform = waveform1 + waveform2
 
@@ -150,9 +153,9 @@ def toy_model_of_two_QNMs_Heaviside(time, A, alpha, f1, f2, tau1, tau2, phi1, ph
     plus = total_waveform.real * tukey_window
     cross = total_waveform.imag * tukey_window
     
-    return {"plus": plus, "cross": cross}
+    return {"plus": plus, "cross": -cross}
 
-def toy_model_of_two_QNMs_Mirror(time, A, alpha, f1, f2, tau1, tau2, phi1, phi2, geocent_time):
+def toy_model_of_two_QNMs_Mirror(time, A, alpha, f1, f2, tau1, tau2, phiA, phialpha, geocent_time):
     
     waveform1 = np.zeros(len(time), dtype=complex)
     waveform2 = np.zeros(len(time), dtype=complex)
@@ -161,10 +164,13 @@ def toy_model_of_two_QNMs_Mirror(time, A, alpha, f1, f2, tau1, tau2, phi1, phi2,
 
     w1 = (2*np.pi*f1 + 1j / tau1)
     w2 = (2*np.pi*f2 + 1j / tau2)
-    delta_w = w2 - w1
+    delta_w = w1 - w2
+
+    amp1 = A / delta_w
+    amp2 = -A / delta_w * (1 + delta_w * alpha * np.exp(1j * phialpha))
         
-    waveform1 = A / delta_w * np.exp(1j * (2*np.pi*f1 * (time - geocent_time)) + 1j * phi1) * np.exp(- np.abs(time - geocent_time) / tau1)
-    waveform2 = -A / delta_w * (1 + delta_w * alpha) * np.exp(1j * (2*np.pi*f2 * (time - geocent_time)) + 1j * phi2) * np.exp(- np.abs(time - geocent_time) / tau2)
+    waveform1 = amp1 * np.exp(1j * (2*np.pi*f1 * (time - geocent_time)) + 1j * phiA) * np.exp(- np.abs(time - geocent_time) / tau1)
+    waveform2 = amp2 * np.exp(1j * (2*np.pi*f2 * (time - geocent_time)) + 1j * phiA) * np.exp(- np.abs(time - geocent_time) / tau2)
 
     total_waveform = waveform1 + waveform2
 
@@ -176,7 +182,7 @@ def toy_model_of_two_QNMs_Mirror(time, A, alpha, f1, f2, tau1, tau2, phi1, phi2,
     plus = total_waveform.real * tukey_window
     cross = total_waveform.imag * tukey_window
     
-    return {"plus": plus, "cross": cross}
+    return {"plus": plus, "cross": -cross}
 
 def toy_model_of_two_QNMs_real_amp(time, A, alpha, f1, f2, tau1, tau2, phi1, phi2, geocent_time):
 
@@ -402,13 +408,9 @@ def toy_model_of_two_QNMs_real_amp_fdomain_Heaviside(frequency, A, alpha, f1, ta
 
     return {'plus': plus, 'cross': cross}
 
-def EP_waveform_tdomain_Mirror(time, A, alpha, f, tau, geocent_time):
-    waveform = np.zeros(len(time), dtype=complex)
+def EP_waveform_tdomain_Mirror(time, C, D, f, tau, phiC, phiD, geocent_time):
 
-    A = A * 1e-17
-    w_ep = (2 * np.pi * f + 1j / tau)
-
-    waveform = - (1/np.sqrt(2)) * (A*alpha + 1j*A*np.abs(time - geocent_time)) * np.exp(1j * (2 * np.pi * f * (time - geocent_time))) * np.exp(- np.abs(time - geocent_time) / tau)
+    waveform = (1/np.sqrt(2)) * (C*np.exp(1j*phiC) + 1j*D*np.exp(1j*phiD)*np.abs(time - geocent_time)) * np.exp(1j * (2 * np.pi * f * (time - geocent_time))) * np.exp(- np.abs(time - geocent_time) / tau)
 
     plus = waveform.real
     cross = waveform.imag
@@ -417,25 +419,22 @@ def EP_waveform_tdomain_Mirror(time, A, alpha, f, tau, geocent_time):
     plus *= tukey_window
     cross *= tukey_window
 
-    return {"plus": plus, "cross": cross}
+    return {"plus": plus, "cross": -cross}
 
-def EP_waveform_tdomain_Heaviside(time, A, alpha, f, tau, geocent_time):
+def EP_waveform_tdomain_Heaviside(time, C, D, f, tau, phiC, phiD, geocent_time):
     waveform = np.zeros(len(time), dtype=complex)
-
-    A = A * 1e-17
-    w_ep = (2 * np.pi * f + 1j / tau)
 
     tidix = time >= geocent_time
-    waveform[tidix] = - (A*alpha + 1j*A*(time[tidix] - geocent_time)) * np.exp(1j * (2 * np.pi * f * (time[tidix] - geocent_time))) * np.exp(- np.abs(time[tidix] - geocent_time) / tau)
-    
+    waveform[tidix] = (C*np.exp(1j*phiC) + 1j*D*np.exp(1j*phiD)*(time[tidix] - geocent_time)) * np.exp(1j * (2 * np.pi * f * (time[tidix] - geocent_time))) * np.exp(- np.abs(time[tidix] - geocent_time) / tau)
+
     plus = waveform.real
     cross = waveform.imag
 
-    tukey_window = windows.tukey(len(time), 0.1)  # Tukey window with alpha=0.1
-    plus *= tukey_window
-    cross *= tukey_window
+    # tukey_window = windows.tukey(len(time), 0.1)  # Tukey window with alpha=0.1
+    # plus *= tukey_window
+    # cross *= tukey_window
 
-    return {"plus": plus, "cross": cross}
+    return {"plus": plus, "cross": -cross}
 
 """analysis code"""
 if __name__ == "__main__" :
@@ -587,12 +586,10 @@ if __name__ == "__main__" :
                                     alpha = float(config_injection['alpha']),
                                     f1 = float(config_injection['f1']),
                                     f2 = float(config_injection['f2']),
-                                    # delta_f = float(config_injection['f2']) - float(config_injection['f1']),
                                     tau1 = float(config_injection['tau1']),
                                     tau2 = float(config_injection['tau2']),
-                                    # delta_tau = float(config_injection['tau2']) - float(config_injection['tau1']),
-                                    phi1 = float(config_injection['phi1']),
-                                    phi2 = float(config_injection['phi2']),
+                                    phiA = float(config_injection['phiA']),
+                                    phialpha = float(config_injection['phialpha']),
                                     ra = float(config_injection['ra']),
                                     dec = float(config_injection['dec']),
                                     psi = float(config_injection['psi']),
@@ -710,10 +707,12 @@ if __name__ == "__main__" :
         priors['phi1'] = bilby.core.prior.Uniform(-np.pi, np.pi, r"$\phi_1$ [rad]", boundary='periodic')
     elif analyze_EP:
         priors = {}
-        priors['A'] = bilby.core.prior.Uniform(0, 100, r"$A$")
-        priors['alpha'] = bilby.core.prior.Uniform(0, 1, r"$\alpha$")
+        priors['C'] = bilby.core.prior.Uniform(0, 1e-16, r"$C$")
+        priors['D'] = bilby.core.prior.Uniform(0, 1e-16, r"$D$")
         priors['f'] = bilby.core.prior.Uniform(20, 500, name='f', latex_label=r"$f$ [Hz]")
         priors['tau'] = bilby.core.prior.Uniform(0.0005, 0.05, name='tau', latex_label=r"$\tau$ [ms]")
+        priors['phiC'] = bilby.core.prior.Uniform(-np.pi, np.pi, r"$\phi_C$ [rad]", boundary='periodic')
+        priors['phiD'] = bilby.core.prior.Uniform(-np.pi, np.pi, r"$\phi_D$ [rad]", boundary='periodic')
     else:
         # priors = injection_parameters.copy()
         priors = bilby.core.prior.ConditionalPriorDict(injection_parameters.copy())
@@ -732,8 +731,11 @@ if __name__ == "__main__" :
                 priors['f2'] = bilby.core.prior.conditional.ConditionalUniform(condition_func=priors_condition.condition_for_f2, name='f2', latex_label=r'$f_2$ [Hz]', minimum=20, maximum=500)
                 priors['tau1'] = bilby.core.prior.Uniform(0.0005, 0.05, name='tau1', latex_label=r"$\tau_1$ [ms]")
                 priors['tau2'] = bilby.core.prior.Uniform(0.0005, 0.05, name='tau2', latex_label=r"$\tau_2$ [ms]")
+            
+            priors['phi1'] = bilby.core.prior.Uniform(-np.pi, np.pi, r"$\phi_1$ [rad]", boundary='periodic')
+            priors['phi2'] = bilby.core.prior.Uniform(-np.pi, np.pi, r"$\phi_2$ [rad]", boundary='periodic')
 
-        if parameterization == 'OT' or parameterization == 'OT_real_amp_Mirror' or parameterization == 'OT_real_amp_Heaviside':
+        if parameterization == 'OT_Mirror' or parameterization == 'OT_Heaviside' or parameterization == 'OT_real_amp_Mirror' or parameterization == 'OT_real_amp_Heaviside':
             priors['A'] = bilby.core.prior.Uniform(0, 1, r"$A$")
             priors['alpha'] = bilby.core.prior.Uniform(0, 1, r"$\alpha$")
 
@@ -748,8 +750,8 @@ if __name__ == "__main__" :
                 priors['tau1'] = bilby.core.prior.Uniform(0.0005, 0.05, name='tau1', latex_label=r"$\tau_1$ [ms]")
                 priors['tau2'] = bilby.core.prior.Uniform(0.0005, 0.05, name='tau2', latex_label=r"$\tau_2$ [ms]")
         
-        priors['phi1'] = bilby.core.prior.Uniform(-np.pi, np.pi, r"$\phi_1$ [rad]", boundary='periodic')
-        priors['phi2'] = bilby.core.prior.Uniform(-np.pi, np.pi, r"$\phi_2$ [rad]", boundary='periodic')
+            priors['phiA'] = bilby.core.prior.Uniform(-np.pi, np.pi, r"$\phi_A$ [rad]", boundary='periodic')
+            priors['phialpha'] = bilby.core.prior.Uniform(-np.pi, np.pi, r"$\phi_\alpha$ [rad]", boundary='periodic')
 
         """set prior of fixed parameters"""
         if mode_number == 'one_mode':
@@ -843,7 +845,9 @@ if __name__ == "__main__" :
     single_posterior_plot.plot_posterior(
                                         path_json = outdir+'/'+label+'_result.json',
                                         path_outdir = outdir,
-                                        default_plot_parameters = True
+                                        default_plot_parameters = True,
+                                        show_fig = False,
+                                        plot_kde = False
                                         )
 
     # result.plot_skymap(maxpts=5000) #maxpts:Maximum number of samples to use, if None all samples are used

@@ -14,19 +14,37 @@ output = test_$(name)_$(cluster)_$$([$(Process)+$(index)]).out
 notification = never
 
 queue name, index from (
-  shiftRe_to_220_dw0.1w1_snr100_DSparam_Heaviside, 0
-  shiftRe_to_220_dw0.01w1_snr100_DSparam_Heaviside, 0
-  shiftRe_to_220_dw0.001w1_snr100_DSparam_Heaviside, 0
-  shiftIm_to_220_dw0.1w1_snr100_DSparam_Heaviside, 0
-  shiftIm_to_220_dw0.01w1_snr100_DSparam_Heaviside, 0
-  shiftIm_to_220_dw0.001w1_snr100_DSparam_Heaviside, 0
+#  shiftRe_to_220_dw0.1w1_snr100_DSparam_Heaviside, 0
+#  shiftRe_to_220_dw0.01w1_snr100_DSparam_Heaviside, 0
+#  shiftRe_to_220_dw0.001w1_snr100_DSparam_Heaviside, 0
+#  shiftIm_to_220_dw0.1w1_snr100_DSparam_Heaviside, 0
+#  shiftIm_to_220_dw0.01w1_snr100_DSparam_Heaviside, 0
+#  shiftIm_to_220_dw0.001w1_snr100_DSparam_Heaviside, 0
 #  space
-#  shiftRe_to_220_dw0.1w1_snr100_OTparam, 0
-#  shiftRe_to_220_dw0.01w1_snr100_OTparam, 0
-#  shiftRe_to_220_dw0.001w1_snr100_OTparam, 0
-#  shiftIm_to_220_dw0.1w1_snr100_OTparam, 0
-#  shiftIm_to_220_dw0.01w1_snr100_OTparam, 0
-#  shiftIm_to_220_dw0.001w1_snr100_OTparam, 0
+#  shiftRe_to_220_dw0.1w1_snr100_DSparam_Mirror, 0
+#  shiftRe_to_220_dw0.01w1_snr100_DSparam_Mirror, 0
+#  shiftRe_to_220_dw0.001w1_snr100_DSparam_Mirror, 0
+#  shiftIm_to_220_dw0.1w1_snr100_DSparam_Mirror, 0
+#  shiftIm_to_220_dw0.01w1_snr100_DSparam_Mirror, 0
+#  shiftIm_to_220_dw0.001w1_snr100_DSparam_Mirror, 0
+#  space
+#  shiftRe_to_220_dw0.1w1_snr100_DSparam_window0.001, 0
+#  shiftRe_to_220_dw0.1w1_snr100_DSparam_window0.003, 0
+#  shiftRe_to_220_dw0.1w1_snr100_DSparam_window0.005, 0
+# space
+#  shiftRe_to_220_dw0.1w1_snr100_OTparam_Heaviside, 0
+#  shiftRe_to_220_dw0.01w1_snr100_OTparam_Heaviside, 0
+#  shiftRe_to_220_dw0.001w1_snr100_OTparam_Heaviside, 0
+#  shiftIm_to_220_dw0.1w1_snr100_OTparam_Heaviside, 0
+#  shiftIm_to_220_dw0.01w1_snr100_OTparam_Heaviside, 0
+#  shiftIm_to_220_dw0.001w1_snr100_OTparam_Heaviside, 0
+# space
+#  shiftRe_to_220_dw0.1w1_snr100_OTparam_Mirror, 0
+#  shiftRe_to_220_dw0.01w1_snr100_OTparam_Mirror, 0
+#  shiftRe_to_220_dw0.001w1_snr100_OTparam_Mirror, 0
+#  shiftIm_to_220_dw0.1w1_snr100_OTparam_Mirror, 0
+#  shiftIm_to_220_dw0.01w1_snr100_OTparam_Mirror, 0
+#  shiftIm_to_220_dw0.001w1_snr100_OTparam_Mirror, 0
 #  space
 #  shiftRe_to_220_dw0.1w1_snr100_OTparam_real_amp_Heaviside, 0
 #  shiftRe_to_220_dw0.01w1_snr100_OTparam_real_amp_Heaviside, 0
@@ -42,16 +60,12 @@ queue name, index from (
 #  shiftIm_to_220_dw0.01w1_snr100_OTparam_real_amp_Mirror, 0
 #  shiftIm_to_220_dw0.001w1_snr100_OTparam_real_amp_Mirror, 0
 #  space
-  shiftRe_to_220_dw0.1w1_snr100_DSparam_Mirror, 0
-  shiftRe_to_220_dw0.01w1_snr100_DSparam_Mirror, 0
-  shiftRe_to_220_dw0.001w1_snr100_DSparam_Mirror, 0
-  shiftIm_to_220_dw0.1w1_snr100_DSparam_Mirror, 0
-  shiftIm_to_220_dw0.01w1_snr100_DSparam_Mirror, 0
-  shiftIm_to_220_dw0.001w1_snr100_DSparam_Mirror, 0
-#  space
-#  shiftRe_to_220_dw0.1w1_snr100_DSparam_window0.001, 0
-#  shiftRe_to_220_dw0.1w1_snr100_DSparam_window0.003, 0
-#  shiftRe_to_220_dw0.1w1_snr100_DSparam_window0.005, 0
+  shiftRe_to_220_dw0.1w1_snr100_EPparam_Heaviside, 0
+  shiftRe_to_220_dw0.01w1_snr100_EPparam_Heaviside, 0
+  shiftRe_to_220_dw0.001w1_snr100_EPparam_Heaviside, 0
+  shiftIm_to_220_dw0.1w1_snr100_EPparam_Heaviside, 0
+  shiftIm_to_220_dw0.01w1_snr100_EPparam_Heaviside, 0
+  shiftIm_to_220_dw0.001w1_snr100_EPparam_Heaviside, 0
 # space
 #  shiftRe_to_220_dw0.1w1_snr100_EPparam_Mirror, 0
 #  shiftRe_to_220_dw0.01w1_snr100_EPparam_Mirror, 0
@@ -59,13 +73,6 @@ queue name, index from (
 #  shiftIm_to_220_dw0.1w1_snr100_EPparam_Mirror, 0
 #  shiftIm_to_220_dw0.01w1_snr100_EPparam_Mirror, 0
 #  shiftIm_to_220_dw0.001w1_snr100_EPparam_Mirror, 0
-# space
-#  shiftRe_to_220_dw0.1w1_snr100_EPparam_Heaviside, 0
-#  shiftRe_to_220_dw0.01w1_snr100_EPparam_Heaviside, 0
-#  shiftRe_to_220_dw0.001w1_snr100_EPparam_Heaviside, 0
-#  shiftIm_to_220_dw0.1w1_snr100_EPparam_Heaviside, 0
-#  shiftIm_to_220_dw0.01w1_snr100_EPparam_Heaviside, 0
-#  shiftIm_to_220_dw0.001w1_snr100_EPparam_Heaviside, 0
 # space
 #  test_oneDS, 0
 #  space

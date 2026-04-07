@@ -209,20 +209,6 @@ def plot_corner_pyring(path_posterior_sample, path_config, path_outdir, plot_kde
             df_ver1['theta_jn'] = np.sin(df_ver1['theta_jn'])**2.
             df_ver1 = df_ver1.rename(columns={'theta_jn':'sin^2(iota)'})
             injection_parameters_dict['sin^2(iota)'] = np.sin(injection_parameters_dict['theta_jn'])**2.
-
-    """change delta_f to f2, delta_tau to tau2"""
-    if 'delta_f' in keys_to_plot:
-        df_ver1['delta_f'] = df_ver1['delta_f'] + df_ver1['f1']
-        df_ver1 = df_ver1.rename(columns={'delta_f':'f2'})
-        injection_parameters_dict['f2'] = injection_parameters_dict['delta_f'] + injection_parameters_dict['f1']
-    if 'delta_tau' in keys_to_plot:
-        df_ver1['delta_tau'] = df_ver1['delta_tau'] + df_ver1['tau1']
-        df_ver1 = df_ver1.rename(columns={'delta_tau':'tau2'})
-        injection_parameters_dict['tau2'] = injection_parameters_dict['delta_tau'] + injection_parameters_dict['tau1']
-    if 'f' in keys_to_plot and 'f1' in injection_parameters_dict.keys():
-        injection_parameters_dict['f'] = (injection_parameters_dict['f1'] + injection_parameters_dict['f2']) / 2
-    if 'tau' in keys_to_plot and 'tau1' in injection_parameters_dict.keys():
-        injection_parameters_dict['tau'] = (injection_parameters_dict['tau1'] + injection_parameters_dict['tau2']) / 2
     
     """change log_A to A"""
     if 'logA' in df_ver1.columns:
@@ -530,6 +516,8 @@ def plot_corner_pyring(path_posterior_sample, path_config, path_outdir, plot_kde
           ax.set_xlabel(latex_labels.get(label_x, label_x), fontsize=20)
           ax.set_ylabel(latex_labels.get(label_y, label_y), fontsize=20)
           ax.tick_params(axis='both', which='major', labelsize=14)
+          ax.xaxis.get_offset_text().set_fontsize(12)
+          ax.yaxis.get_offset_text().set_fontsize(12)
     
     """set file name of save fig"""
     def get_filename_without_extension(path):
@@ -561,16 +549,3 @@ if __name__ == "__main__":
     config_file_path = f'./outdirs/outdir_{label}/{label}.ini'
     path_outdir = f'outdirs/outdir_{label}/'
     plot_corner_pyring(path_posterior, config_file_path, path_outdir, plot_kde=False, show_fig=False)
-
-    # label_list = ['pyring_shiftIm_to_220_dw0.1w1_snr100_DSparam',
-    #               'pyring_shiftIm_to_220_dw0.01w1_snr100_DSparam',
-    #               'pyring_shiftIm_to_220_dw0.001w1_snr100_DSparam',
-    #               'pyring_shiftRe_to_220_dw0.1w1_snr100_DSparam',
-    #               'pyring_shiftRe_to_220_dw0.01w1_snr100_DSparam',
-    #               'pyring_shiftRe_to_220_dw0.001w1_snr100_DSparam',
-    #               ]
-    # for label in label_list:
-    #     path_posterior = f'./outdirs/outdir_{label}/Nested_sampler/posterior.dat'
-    #     config_file_path = f'./outdirs/outdir_{label}/{label}.ini'
-    #     path_outdir = f'outdirs/outdir_{label}/'
-    #     plot_corner_pyring(path_posterior, config_file_path, path_outdir, show_fig=False)

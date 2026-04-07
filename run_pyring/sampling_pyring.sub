@@ -31,13 +31,17 @@ queue name, index from (
 #  pyring_shiftRe_to_220_dw0.01w1_snr100_DSparam_zero_noise, 0
 #  pyring_shiftRe_to_220_dw0.001w1_snr100_DSparam_zero_noise, 0
 #space
-  pyring_shiftIm_to_220_dw0.1w1_snr100_DSparam, 0
-  pyring_shiftIm_to_220_dw0.01w1_snr100_DSparam, 0
-  pyring_shiftIm_to_220_dw0.001w1_snr100_DSparam, 0
-  pyring_shiftRe_to_220_dw0.1w1_snr100_DSparam, 0
-  pyring_shiftRe_to_220_dw0.01w1_snr100_DSparam, 0
-  pyring_shiftRe_to_220_dw0.001w1_snr100_DSparam, 0
+#  pyring_shiftIm_to_220_dw0.3w1_snr100_DSparam, 0
+#  pyring_shiftRe_to_220_dw0.3w1_snr100_DSparam, 0
+#  pyring_shiftIm_to_220_dw0.1w1_snr100_DSparam, 0
+#  pyring_shiftIm_to_220_dw0.01w1_snr100_DSparam, 0
+#  pyring_shiftIm_to_220_dw0.001w1_snr100_DSparam, 0
+#  pyring_shiftRe_to_220_dw0.1w1_snr100_DSparam, 0
+#  pyring_shiftRe_to_220_dw0.01w1_snr100_DSparam, 0
+#  pyring_shiftRe_to_220_dw0.001w1_snr100_DSparam, 0
 #space
+#  pyring_shiftIm_to_220_dw0.3w1_snr100_OTparam, 0
+#  pyring_shiftRe_to_220_dw0.3w1_snr100_OTparam, 0
 #  pyring_shiftIm_to_220_dw0.1w1_snr100_OTparam, 0
 #  pyring_shiftIm_to_220_dw0.01w1_snr100_OTparam, 0
 #  pyring_shiftIm_to_220_dw0.001w1_snr100_OTparam, 0
@@ -45,10 +49,30 @@ queue name, index from (
 #  pyring_shiftRe_to_220_dw0.01w1_snr100_OTparam, 0
 #  pyring_shiftRe_to_220_dw0.001w1_snr100_OTparam, 0
 #space
+#  pyring_shiftIm_to_220_dw0.3w1_snr100_EPparam, 0
+#  pyring_shiftRe_to_220_dw0.3w1_snr100_EPparam, 0
 #  pyring_shiftIm_to_220_dw0.1w1_snr100_EPparam, 0
 #  pyring_shiftIm_to_220_dw0.01w1_snr100_EPparam, 0
 #  pyring_shiftIm_to_220_dw0.001w1_snr100_EPparam, 0
 #  pyring_shiftRe_to_220_dw0.1w1_snr100_EPparam, 0
 #  pyring_shiftRe_to_220_dw0.01w1_snr100_EPparam, 0
 #  pyring_shiftRe_to_220_dw0.001w1_snr100_EPparam, 0
+#space
+#  pyring_220_221_snr100_OTparam, 0
+#  pyring_220_221_snr100_DSparam, 0
+#  pyring_220_221_snr100_EPparam, 0
+#space
+#  pyring_shift45deg_to_220_dw0.1w1_snr100_OTparam, 0
+#  pyring_shift45deg_to_220_dw0.01w1_snr100_OTparam, 0
+#  pyring_shift45deg_to_220_dw0.001w1_snr100_OTparam, 0
+#  pyring_shift45deg_to_220_dw0.1w1_snr100_DSparam, 0
+#  pyring_shift45deg_to_220_dw0.01w1_snr100_DSparam, 0
+#  pyring_shift45deg_to_220_dw0.001w1_snr100_DSparam, 0
+#  pyring_shift45deg_to_220_dw0.1w1_snr100_EPparam, 0
+#  pyring_shift45deg_to_220_dw0.01w1_snr100_EPparam, 0
+#  pyring_shift45deg_to_220_dw0.001w1_snr100_EPparam, 0
+#space
+  pyring_a0.9_225_226_snr100_OTparam, 0
+  pyring_a0.9_225_226_snr100_DSparam, 0
+  pyring_a0.9_225_226_snr100_EPparam, 0
 )
