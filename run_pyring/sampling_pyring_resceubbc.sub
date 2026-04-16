@@ -1,0 +1,64 @@
+universe = vanilla
+executable = run_py_resceubbc.sh
+
+arguments = ./config/$(name).ini
+
+request_memory = 4GB
+request_disk = 1GB
+request_cpus = 96
+
+log = ../test.log
+
+error = test_$(name)_$(cluster)_$$([$(Process)+$(index)]).err
+output = test_$(name)_$(cluster)_$$([$(Process)+$(index)]).out
+
+notification = never
+
+requirements = (TARGET.PartitionableSlot == true) && \
+        (TARGET.Cpus >= RequestCpus) && \
+        ( \
+        regexp("@hpc(2[1-9]|3[0-9]|4[0-9]|5[0-6])(-100g)?(.resceu.s.u-tokyo.ac.jp)?$", TARGET.Name) \
+        || \
+        regexp("^hpc(2[1-9]|3[0-9]|4[0-9]|5[0-6])(-100g)?(.resceu.s.u-tokyo.ac.jp)?$", TARGET.Machine) \
+        )
+
+queue name, index from (
+#  example_damped_sinusoids_inj_gaussian_noise, 0
+#  example_damped_sinusoids_inj_zero_noise_ds_ordering, 0
+#  example_damped_sinusoids_inj_zero_noise_explicit_prior, 0
+#  example_damped_sinusoids_inj_gaussian_noise_change_psd, 0
+#  example_damped_sinusoids_inj_gaussian_noise_two_modes, 0
+#space
+#  pyring_oneDS_zero_noise, 0
+#  pyring_oneDS_zero_noise_no_bandpassing_sampling-rate_16384, 0
+#  pyring_oneDS, 0
+#  pyring_oneDS_no_bandpassing, 0
+#space
+#  pyring_shiftIm_to_220_dw0.1w1_snr100_DSparam_zero_noise, 0
+#  pyring_shiftIm_to_220_dw0.01w1_snr100_DSparam_zero_noise, 0
+#  pyring_shiftIm_to_220_dw0.001w1_snr100_DSparam_zero_noise, 0
+#  pyring_shiftRe_to_220_dw0.1w1_snr100_DSparam_zero_noise, 0
+#  pyring_shiftRe_to_220_dw0.01w1_snr100_DSparam_zero_noise, 0
+#  pyring_shiftRe_to_220_dw0.001w1_snr100_DSparam_zero_noise, 0
+#space
+#  pyring_shiftIm_to_220_dw0.1w1_snr100_DSparam, 0
+#  pyring_shiftIm_to_220_dw0.01w1_snr100_DSparam, 0
+#  pyring_shiftIm_to_220_dw0.001w1_snr100_DSparam, 0
+#  pyring_shiftRe_to_220_dw0.1w1_snr100_DSparam, 0
+#  pyring_shiftRe_to_220_dw0.01w1_snr100_DSparam, 0
+#  pyring_shiftRe_to_220_dw0.001w1_snr100_DSparam, 0
+#space
+#  pyring_shiftIm_to_220_dw0.1w1_snr100_OTparam_real_amp, 0
+#  pyring_shiftIm_to_220_dw0.01w1_snr100_OTparam_real_amp, 0
+#  pyring_shiftIm_to_220_dw0.001w1_snr100_OTparam_real_amp, 0
+#  pyring_shiftRe_to_220_dw0.1w1_snr100_OTparam_real_amp, 0
+#  pyring_shiftRe_to_220_dw0.01w1_snr100_OTparam_real_amp, 0
+#  pyring_shiftRe_to_220_dw0.001w1_snr100_OTparam_real_amp, 0
+#space
+  pyring_shiftIm_to_220_dw0.1w1_snr100_EPparam, 0
+  pyring_shiftIm_to_220_dw0.01w1_snr100_EPparam, 0
+  pyring_shiftIm_to_220_dw0.001w1_snr100_EPparam, 0
+  pyring_shiftRe_to_220_dw0.1w1_snr100_EPparam, 0
+  pyring_shiftRe_to_220_dw0.01w1_snr100_EPparam, 0
+  pyring_shiftRe_to_220_dw0.001w1_snr100_EPparam, 0
+)
