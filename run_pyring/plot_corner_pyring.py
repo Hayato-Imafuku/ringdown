@@ -131,13 +131,17 @@ def plot_corner_pyring(path_posterior_sample, path_config, path_outdir, plot_kde
             # print("Detected header misalignment due to '#'. Fixing columns...")
     # print(df_ver1)
 
-    """set injection value of version1"""
+    """load config file"""
     config_ini = configparser.ConfigParser()
     config_ini.optionxform = str
     config_ini.read(path_config, encoding='utf-8')
     if not os.path.exists(path_config):
         raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), path_config)
     config_injection = config_ini['Injection']
+    config_prior = config_ini['Priors']
+    config_input = config_ini['input']
+
+    """set injection value of version1"""
     injection_parameters_dict = {}
     for key, val in config_injection.items():
         if 'A_' in key or key in ['A1', 'A2']:
@@ -150,7 +154,8 @@ def plot_corner_pyring(path_posterior_sample, path_config, path_outdir, plot_kde
                 df_ver1[key] = df_ver1[key] * 1e17
         else:
             injection_parameters_dict[key] = float(val)
-    if 'EPparam' in path_posterior_sample:
+
+    if config_input['template'] == 'EP_waveform' and config_input['injection-approximant'] == 'toy_model_of_two_QNMs':
         injection_parameters_dict_new = {}
         injection_parameters_dict_new['C'] = injection_parameters_dict['A'] * injection_parameters_dict['alpha'] * 1e4
         injection_parameters_dict_new['D'] = injection_parameters_dict['A']
@@ -161,12 +166,24 @@ def plot_corner_pyring(path_posterior_sample, path_config, path_outdir, plot_kde
         injection_parameters_dict = injection_parameters_dict_new
         df_ver1['C'] = df_ver1['C'] * 1e21
         df_ver1['D'] = df_ver1['D'] * 1e17
-    print(' injection_parameters : {}'.format(injection_parameters_dict))
+
+    if config_input['template'] == 'EP_waveform' and config_input['injection-approximant'] == 'Damped-sinusoids':
+        injection_parameters_dict_new = {}
+        injection_parameters_dict_new['C'] = injection_parameters_dict['A_t_0'] * 1e2
+        injection_parameters_dict_new['D'] = 0
+        injection_parameters_dict_new['f'] = injection_parameters_dict['f_t_0']
+        injection_parameters_dict_new['tau'] = injection_parameters_dict['tau_t_0']
+        injection_parameters_dict_new['phiC'] = injection_parameters_dict['phi_t_0']
+        injection_parameters_dict_new['phiD'] = None
+        injection_parameters_dict = injection_parameters_dict_new
+        df_ver1['C'] = df_ver1['C'] * 1e21
+        df_ver1['D'] = df_ver1['D'] * 1e17
+
+    print(f'\ntemplate: {config_input["template"]} and injection-approximant: {config_input["injection-approximant"]}')
+    print('\ninjection_parameters : {}'.format(injection_parameters_dict))
 
     """set fixed parameters"""
-    config_prior = config_ini['Priors']
     prior_parameters_dict = {key: value for key, value in config_prior.items()}
-    config_input = config_ini['input']
     mode = json.loads(config_input.get('inject-n-ds-modes', '{}'))
     fix_parameters_list = []
     for key in prior_parameters_dict.keys():
